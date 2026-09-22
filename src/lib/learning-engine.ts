@@ -1,15 +1,17 @@
-export type QuizQuestion = { id:string; prompt:string; options:string[]; answer:number; explanation:string };
-export type Lesson = { id:string; skillId:string; title:string; concept:string; minutes:number; questions:QuizQuestion[] };
-export const pythonLessons: Lesson[] = [
- {id:"python-variables",skillId:"python",title:"Variables",concept:"Variables store values so your program can reuse and change information.",minutes:8,questions:[{id:"q1",prompt:"What does x = 10 do?",options:["Prints 10","Stores 10 in x","Adds 10 to x","Creates a function"],answer:1,explanation:"The assignment stores the value 10 in the variable x."}]},
- {id:"python-types",skillId:"python",title:"Data Types",concept:"Python values have types such as strings, integers, floats and booleans.",minutes:8,questions:[{id:"q1",prompt:"What type is the value 42?",options:["str","bool","int","list"],answer:2,explanation:"42 is an integer (int)."}]},
- {id:"python-conditions",skillId:"python",title:"Conditions",concept:"if statements let your program choose what to do based on a condition.",minutes:9,questions:[{id:"q1",prompt:"Which keyword starts a condition in Python?",options:["when","if","check","case"],answer:1,explanation:"Python uses the if keyword for conditional execution."}]},
- {id:"python-loops",skillId:"python",title:"Loops",concept:"Loops repeat work without writing the same code again and again.",minutes:10,questions:[{id:"q1",prompt:"Which loop is commonly used to iterate over a list?",options:["for","repeat","loop","each"],answer:0,explanation:"A for loop iterates over items in an iterable such as a list."}]},
- {id:"python-functions",skillId:"python",title:"Functions",concept:"Functions package reusable logic and can receive arguments and return values.",minutes:10,questions:[{id:"q1",prompt:"What keyword defines a function?",options:["func","define","def","function"],answer:2,explanation:"Python uses def to define a function."}]}
-];
-const KEY="skillforge.learning.v1";
-export type LearningProgress={xp:number;completedLessons:string[];answers:number;correct:number;lastActive:string};
-export function loadProgress():LearningProgress{try{return JSON.parse(localStorage.getItem(KEY)||"null")||{xp:0,completedLessons:[],answers:0,correct:0,lastActive:""}}catch{return {xp:0,completedLessons:[],answers:0,correct:0,lastActive:""}}}
-export function saveProgress(p:LearningProgress){localStorage.setItem(KEY,JSON.stringify(p));}
-export function isUnlocked(index:number,p:LearningProgress){return index===0||p.completedLessons.includes(pythonLessons[index-1].id)}
-export function answerQuestion(p:LearningProgress,lessonId:string,correct:boolean){const next={...p,xp:p.xp+(correct?10:0),answers:p.answers+1,correct:p.correct+(correct?1:0),lastActive:new Date().toISOString()};if(correct&&!next.completedLessons.includes(lessonId))next.completedLessons=[...next.completedLessons,lessonId];saveProgress(next);return next;}
+export type QuizQuestion={id:string;prompt:string;options:string[];answer:number;explanation:string};
+export type Lesson={id:string;skillId:string;title:string;concept:string;minutes:number;questions:QuizQuestion[]};
+export type SkillPath={id:string;title:string;description:string;lessons:Lesson[]};
+import {skillPaths} from "./learning-catalog";
+export {skillPaths};
+export const allLessons=skillPaths.flatMap(p=>p.lessons);
+const KEY="skillforge.learning.v2";
+export type LearningProgress={xp:number;completedLessons:string[];answers:number;correct:number;lastActive:string;streak:number;bestStreak:number;sessionDates:string[];achievements:string[]};
+const empty=():LearningProgress=>({xp:0,completedLessons:[],answers:0,correct:0,lastActive:"",streak:0,bestStreak:0,sessionDates:[],achievements:[]});
+export function loadProgress():LearningProgress{if(typeof window==="undefined")return empty();try{return {...empty(),...(JSON.parse(localStorage.getItem(KEY)||"null")||{})}}catch{return empty()}}
+export function saveProgress(p:LearningProgress){if(typeof window!=="undefined")localStorage.setItem(KEY,JSON.stringify(p))}
+export function lessonsForSkill(id:string){return skillPaths.find(p=>p.id===id)?.lessons??[]}
+export function isUnlocked(lesson:Lesson,p:LearningProgress){const a=lessonsForSkill(lesson.skillId),i=a.findIndex(x=>x.id===lesson.id);return i<=0||p.completedLessons.includes(a[i-1].id)}
+const day=(d=new Date())=>d.toISOString().slice(0,10);
+export function answerQuestion(p:LearningProgress,lesson:Lesson,correct:boolean){const n={...p};n.answers++;if(correct){n.correct++;n.xp+=10;if(!n.completedLessons.includes(lesson.id))n.completedLessons=[...n.completedLessons,lesson.id]}const today=day();if(!n.sessionDates.includes(today))n.sessionDates=[...n.sessionDates,today];const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);n.streak=n.sessionDates.includes(day(yesterday))?Math.max(n.streak,1)+1:1;n.bestStreak=Math.max(n.bestStreak,n.streak);n.lastActive=new Date().toISOString();if(correct&&!n.achievements.includes("first-answer"))n.achievements.push("first-answer");if(n.completedLessons.length>=5&&!n.achievements.includes("five-lessons"))n.achievements.push("five-lessons");if(n.completedLessons.length>=allLessons.length&&!n.achievements.includes("all-lessons"))n.achievements.push("all-lessons");saveProgress(n);return n}
+export const accuracy=(p:LearningProgress)=>p.answers?Math.round(p.correct/p.answers*100):0;
+export function recommendedLesson(p:LearningProgress){return allLessons.find(l=>isUnlocked(l,p)&&!p.completedLessons.includes(l.id))??allLessons[0]}
