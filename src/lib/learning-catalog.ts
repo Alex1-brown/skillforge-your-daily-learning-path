@@ -1,0 +1,27 @@
+import type {Lesson,SkillPath} from "./learning-engine";
+const q=(id:string,prompt:string,options:string[],answer:number,explanation:string)=>({id,prompt,options,answer,explanation});
+export const skillPaths:SkillPath[]=[
+{id:"python",title:"Python",description:"Programming fundamentals.",lessons:[
+{id:"python-variables",skillId:"python",title:"Variables",concept:"Store reusable values.",minutes:8,questions:[q("q1","What does x = 10 do?",["Prints 10","Stores 10 in x","Adds 10 to x"],1,"Assignment stores 10 in x.")]},
+{id:"python-types",skillId:"python",title:"Data Types",concept:"Values have types such as strings, integers and booleans.",minutes:8,questions:[q("q1","What type is 42?",["str","bool","int"],2,"42 is an integer.")]},
+{id:"python-conditions",skillId:"python",title:"Conditions",concept:"if statements choose what code runs.",minutes:9,questions:[q("q1","Which keyword starts a condition?",["when","if","check"],1,"Python uses if.")]},
+{id:"python-loops",skillId:"python",title:"Loops",concept:"Loops repeat work.",minutes:10,questions:[q("q1","Which loop iterates over a list?",["for","repeat","each"],0,"for iterates over an iterable.")]},
+{id:"python-functions",skillId:"python",title:"Functions",concept:"Functions package reusable logic.",minutes:10,questions:[q("q1","What keyword defines a function?",["func","def","function"],1,"Python uses def.")]}]},
+{id:"english",title:"English",description:"Vocabulary, grammar and communication.",lessons:[
+{id:"english-vocab",skillId:"english",title:"Core Vocabulary",concept:"Build a useful high-frequency vocabulary.",minutes:8,questions:[q("q1","Choose the correct sentence.",["She work every day.","She works every day."],1,"She takes -s in the present simple.")]},
+{id:"english-tenses",skillId:"english",title:"Present & Past",concept:"Tense shows when an action happens.",minutes:9,questions:[q("q1","Which is a completed past action?",["I visit London.","I visited London last year."],1,"Visited describes a completed past action.")]},
+{id:"english-reading",skillId:"english",title:"Reading",concept:"Use context to understand meaning.",minutes:10,questions:[q("q1","What helps with an unknown word?",["Context","Stopping","Translating everything"],0,"Context often gives useful clues.")]},
+{id:"english-speaking",skillId:"english",title:"Communication",concept:"Use clear and polite structures.",minutes:8,questions:[q("q1","Which is polite?",["Give me that.","Could you help me, please?"],1,"Could you... please? is a polite request.")]},
+{id:"english-writing",skillId:"english",title:"Writing",concept:"Organize ideas into clear sentences.",minutes:10,questions:[q("q1","What improves clarity?",["Clear sentence structure","Random words"],0,"Clear structure makes writing easier to understand.")]}]},
+{id:"ai",title:"AI",description:"AI concepts, prompting and verification.",lessons:[
+{id:"ai-basics",skillId:"ai",title:"AI Basics",concept:"Understand machine learning and modern AI.",minutes:8,questions:[q("q1","What is machine learning?",["A database","Learning patterns from data"],1,"Machine learning learns patterns from data.")]},
+{id:"ai-prompts",skillId:"ai",title:"Prompting",concept:"Give AI a task, context and output requirements.",minutes:8,questions:[q("q1","Which prompt is more specific?",["Write something.","Write a 5-line Python example for a beginner."],1,"Specific constraints reduce ambiguity.")]},
+{id:"ai-evaluation",skillId:"ai",title:"Verification",concept:"Check important AI claims against reliable evidence.",minutes:9,questions:[q("q1","What should you do with an important claim?",["Assume it","Verify it"],1,"Verification catches factual errors.")]},
+{id:"ai-workflows",skillId:"ai",title:"AI Workflows",concept:"Combine generation, checking and useful outputs.",minutes:10,questions:[q("q1","What belongs in a robust workflow?",["Generation plus validation","Only generation"],0,"Validation makes workflows more reliable.")]},
+{id:"ai-project",skillId:"ai",title:"AI Project",concept:"Turn a goal into a repeatable AI-assisted workflow.",minutes:12,questions:[q("q1","What comes first?",["A clear goal","Random prompts"],0,"A clear goal defines the workflow.")]}]},
+{id:"programming",title:"Programming",description:"Logic, data, debugging and projects.",lessons:[
+{id:"prog-logic",skillId:"programming",title:"Logic",concept:"Combine conditions and operations.",minutes:8,questions:[q("q1","What does a boolean represent?",["True/false","Only numbers"],0,"Boolean values represent true or false.")]},
+{id:"prog-data",skillId:"programming",title:"Data Structures",concept:"Organize information for programs.",minutes:9,questions:[q("q1","Which stores ordered items in Python?",["list","boolean"],0,"A list stores an ordered collection.")]},
+{id:"prog-debug",skillId:"programming",title:"Debugging",concept:"Find, understand and fix errors.",minutes:10,questions:[q("q1","What is a useful first step?",["Read the error and reproduce it","Delete everything"],0,"Evidence helps locate the cause.")]},
+{id:"prog-projects",skillId:"programming",title:"Small Projects",concept:"Combine concepts into a working solution.",minutes:12,questions:[q("q1","What should a project start with?",["A clear problem","Hundreds of features"],0,"A clear problem defines scope.")]},
+{id:"prog-review",skillId:"programming",title:"Review",concept:"Test your solution and improve it.",minutes:10,questions:[q("q1","Why test a program?",["To find failures","To make it random"],0,"Tests reveal unexpected behavior.")]}]}];
