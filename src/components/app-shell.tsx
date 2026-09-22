@@ -1,0 +1,29 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { BarChart3, BookOpen, CheckSquare, Flame, Home, LogOut, Sparkles, UserRound } from "lucide-react";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+
+const nav = [
+  { to: "/dashboard", label: "Home", Icon: Home },
+  { to: "/skills", label: "Skills", Icon: BookOpen },
+  { to: "/daily", label: "Today", Icon: CheckSquare },
+  { to: "/progress", label: "Progress", Icon: BarChart3 },
+  { to: "/profile", label: "Profile", Icon: UserRound },
+] as const;
+
+export function AppShell({ children, title, eyebrow, action }: { children: ReactNode; title: string; eyebrow?: string; action?: ReactNode }) {
+  const pathname = useRouterState({ select: s => s.location.pathname });
+  return <div className="min-h-screen bg-background pb-24 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:pb-0">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-surface px-4 py-5 lg:flex">
+      <Link to="/" className="flex items-center gap-2 px-2 font-display text-lg font-bold"><span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground"><Sparkles className="size-4" /></span>SkillForge</Link>
+      <nav className="mt-10 space-y-1">{nav.map(({to,label,Icon}) => <Link key={to} to={to} className={`flex h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold transition-colors ${pathname===to?'bg-accent text-accent-foreground':'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}><Icon className="size-4" />{label}</Link>)}</nav>
+      <div className="mt-auto rounded-md border border-border bg-card p-3"><div className="flex items-center gap-2"><Flame className="size-5 text-primary"/><div><p className="text-xs text-muted-foreground">Current streak</p><p className="font-display text-sm font-bold">12 days strong</p></div></div></div>
+      <Button asChild variant="ghost" className="mt-2 justify-start text-muted-foreground"><Link to="/"><LogOut />Exit app</Link></Button>
+    </aside>
+    <div className="min-w-0 lg:col-start-2">
+      <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur-xl"><div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-8 lg:py-5"><div className="min-w-0"><p className="truncate text-xs font-bold uppercase text-primary">{eyebrow ?? "Your learning space"}</p><h1 className="truncate text-xl font-bold sm:text-2xl">{title}</h1></div><div className="shrink-0">{action ?? <Link to="/profile" className="grid size-10 place-items-center rounded-full bg-secondary font-display text-xs font-bold">AB</Link>}</div></div></header>
+      <main className="mx-auto max-w-6xl px-5 py-6 sm:px-8 sm:py-8">{children}</main>
+    </div>
+    <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-lg border border-border bg-surface/95 p-1.5 shadow-2xl backdrop-blur-xl lg:hidden">{nav.map(({to,label,Icon}) => <Link key={to} to={to} aria-label={label} className={`flex h-13 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold transition-colors ${pathname===to?'bg-primary text-primary-foreground':'text-muted-foreground'}`}><Icon className="size-4" />{label}</Link>)}</nav>
+  </div>
+}
