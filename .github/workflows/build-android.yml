@@ -20,11 +20,16 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Build web app
-        run: npm run build
+        run: bun run build
 
       - name: Prepare Capacitor web directory
         shell: bash
