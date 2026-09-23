@@ -37,26 +37,10 @@ jobs:
           set -e
           rm -rf dist/client
           mkdir -p dist/client
-
-          if [ -d ".output/public" ]; then
-            cp -R .output/public/. dist/client/
-          elif [ -d "dist" ]; then
-            cp -R dist/. dist/client/ 2>/dev/null || true
-          else
-            echo "No web build directory found"
-            exit 1
-          fi
-
-          # TanStack Start's production build does not emit a static index.html.
-          # Capacitor requires one, so create a minimal client entry page from
-          # the generated browser bundle.
+          cp -R .output/public/. dist/client/
           if [ ! -f "dist/client/index.html" ]; then
             entry=$(find dist/client/assets -maxdepth 1 -type f -name 'index-*.js' | head -n 1)
-            if [ -z "$entry" ]; then
-              echo "Could not find the generated client entry bundle"
-              find dist/client -maxdepth 2 -type f | sort | head -n 100
-              exit 1
-            fi
+            test -n "$entry"
             entry="${entry#dist/client/}"
             cat > dist/client/index.html <<EOF
           <!doctype html>
@@ -73,12 +57,7 @@ jobs:
           </html>
           EOF
           fi
-
           test -s dist/client/index.html
-          echo "Capacitor web directory:"
-          ls -la dist/client
-          echo "Entry:"
-          grep -n "script type" dist/client/index.html
 
       - name: Add Android platform
         run: npx cap add android
@@ -92,8 +71,16 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          set -e
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager"
+          fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Build debug APK
         working-directory: android
