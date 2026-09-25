@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { exportProgress, loadProgress } from "@/lib/learning-engine";
+import { loadProgress } from "@/lib/learning-engine";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [
@@ -40,11 +40,6 @@ function Profile() {
     localStorage.setItem(PROFILE_KEY, JSON.stringify({ name: clean }));
   };
 
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([exportProgress(p)], { type: "application/json" }));
-    const a = document.createElement("a"); a.href = url; a.download = "skillforge-progress.json"; a.click(); URL.revokeObjectURL(url);
-  };
-
   return <AppShell title="Your profile" eyebrow="Personal settings">
     <div className="grid gap-6 lg:grid-cols-[.65fr_1.35fr]">
       <aside className="rounded-md border border-border bg-card p-6 text-center">
@@ -61,7 +56,6 @@ function Profile() {
         </div>
         {editing ? <div className="mt-6 grid grid-cols-2 gap-2"><Button variant="forge" onClick={save}>Save</Button><Button variant="outline" onClick={() => { setDraft(name); setEditing(false); }}>Cancel</Button></div>
           : <Button variant="outline" className="mt-6 w-full" onClick={() => setEditing(true)}>Edit profile</Button>}
-        <Button variant="outline" className="mt-2 w-full" onClick={download}>Export progress</Button>
       </aside>
       <section>
         <div className="rounded-md border border-border bg-card">
