@@ -45,15 +45,19 @@ function Learn() {
   };
 
   const nextQuestion = () => {
-    if (!checked) return;
+    if (!checked || selected !== q.answer) {
+      setSelected(null);
+      setChecked(false);
+      return;
+    }
     if (questionIndex < lesson.questions.length - 1) {
-      setQuestionIndex((v) => v + 1); setSelected(null); setChecked(false); return;
+      setQuestionIndex((v) => v + 1);
+      setSelected(null);
+      setChecked(false);
+      return;
     }
-    const finalScore = lessonCorrect + (selected === q.answer ? 1 : 0);
-    if (finalScore === lesson.questions.length) {
-      setP((current) => completeLesson(current, lesson));
-    }
-    if (index < path.lessons.length - 1 && (finalScore === lesson.questions.length)) chooseLesson(index + 1);
+    setP((current) => completeLesson(current, lesson));
+    if (index < path.lessons.length - 1) chooseLesson(index + 1);
     else { setSelected(null); setChecked(false); }
   };
 
@@ -105,7 +109,9 @@ function Learn() {
           <Button className="mt-4" variant="forge" disabled={selected === null || checked} onClick={check}>Check answer</Button>
           {checked && <p className="mt-4 text-sm font-medium">{selected === q.answer ? "✓ Correct! +10 XP" : "✗ Not correct."} {q.explanation}</p>}
           {checked && <Button className="mt-4" variant="outline" onClick={nextQuestion}>
-            {questionIndex < lesson.questions.length - 1 ? "Next question →" : "Finish lesson →"}
+            {selected === q.answer
+              ? (questionIndex < lesson.questions.length - 1 ? "Next question →" : "Finish lesson →")
+              : "Try again"}
           </Button>}
         </div>
       </main>
