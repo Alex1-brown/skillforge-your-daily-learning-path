@@ -3,7 +3,7 @@
 SkillForge is an offline-first learning application for Python, English, AI and Programming.
 
 ## Learning Engine
-- 20 starter lessons across 4 learning paths
+- 32 lessons across 4 existing learning paths
 - interactive quizzes with explanations
 - XP, streaks, accuracy and achievements
 - weak-topic review queue
@@ -12,7 +12,7 @@ SkillForge is an offline-first learning application for Python, English, AI and 
 - mobile-first responsive UI
 
 ## Android
-Capacitor is configured for Android packaging. GitHub Actions automatically builds a debug APK on pushes to main and uploads it as the `skillforge-debug-apk` artifact.
+Capacitor is configured for Android packaging. GitHub Actions can build a debug APK manually from the workflow and uploads it as the `skillforge-debug-apk` artifact. Code changes do not trigger an APK build automatically.
 
 ## Development
 ```sh
