@@ -20,14 +20,9 @@ function Learn() {
   const [lessonStarted, setLessonStarted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0];
-  if (!path) return null;
-
-  const lesson = path.lessons[index] ?? path.lessons[0];
-  if (!lesson) return null;
-
-  const q = lesson.questions[questionIndex] ?? lesson.questions[0];
-  if (!q) return null;
+  const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0]!;
+  const lesson = path.lessons[index] ?? path.lessons[0]!;
+  const q = lesson.questions[questionIndex] ?? lesson.questions[0]!;
 
   useEffect(() => {
     setIndex(0); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
@@ -134,6 +129,7 @@ function Learn() {
               : "Try again"}
           </Button>}
         </div>}
+      </main>
       <aside className="rounded-md border border-border bg-card p-5">
         <p className="text-xs font-bold uppercase text-primary">Your learning</p>
         <p className="mt-2 text-3xl font-bold">{p.xp} XP</p>
