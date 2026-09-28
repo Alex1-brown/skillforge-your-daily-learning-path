@@ -143,8 +143,11 @@ export function completeLesson(p: LearningProgress, lesson: Lesson) {
 }
 
 export const accuracy = (p: LearningProgress) => p.answers ? Math.round((p.correct / p.answers) * 100) : 0;
-export function recommendedLesson(p: LearningProgress) {
+export function recommendedLesson(p: LearningProgress): Lesson {
+  const fallback = allLessons[0];
+  if (!fallback) throw new Error("SkillForge has no lessons configured");
+
   return allLessons.find((l) => p.reviewQueue.includes(l.id) && isUnlocked(l, p))
     ?? allLessons.find((l) => isUnlocked(l, p) && !p.completedLessons.includes(l.id))
-    ?? allLessons[0];
+    ?? fallback;
 }
