@@ -57,8 +57,38 @@ export function exportProgress(p: LearningProgress) {
 }
 export function importProgress(raw: string) {
   const data = JSON.parse(raw);
-  if (data?.format !== "skillforge-learning" || !data.progress) throw new Error("Invalid SkillForge progress file");
-  const p = { ...empty(), ...data.progress };
+  const source = data?.progress;
+
+  if (
+    data?.format !== "skillforge-learning" ||
+    !source ||
+    typeof source !== "object" ||
+    !Array.isArray(source.completedLessons) ||
+    !Array.isArray(source.sessionDates) ||
+    !Array.isArray(source.achievements) ||
+    !Array.isArray(source.reviewQueue) ||
+    typeof source.xp !== "number" ||
+    typeof source.answers !== "number" ||
+    typeof source.correct !== "number" ||
+    typeof source.streak !== "number" ||
+    typeof source.bestStreak !== "number"
+  ) {
+    throw new Error("Invalid SkillForge progress file");
+  }
+
+  const p: LearningProgress = {
+    xp: Math.max(0, source.xp),
+    completedLessons: source.completedLessons.filter((id): id is string => typeof id === "string" && allLessons.some((l) => l.id === id)),
+    answers: Math.max(0, source.answers),
+    correct: Math.max(0, Math.min(source.correct, source.answers)),
+    lastActive: typeof source.lastActive === "string" ? source.lastActive : "",
+    streak: Math.max(0, source.streak),
+    bestStreak: Math.max(0, source.bestStreak),
+    sessionDates: [...new Set(source.sessionDates.filter((date): date is string => typeof date === "string"))],
+    achievements: [...new Set(source.achievements.filter((id): id is string => typeof id === "string"))],
+    reviewQueue: [...new Set(source.reviewQueue.filter((id): id is string => typeof id === "string" && allLessons.some((l) => l.id === id)))],
+  };
+
   saveProgress(p);
   return p;
 }
@@ -72,9 +102,15 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 
 function updateStreak(n: LearningProgress) {
   const today = day();
-  if (!n.sessionDates.includes(today)) n.sessionDates.push(today);
+  if (n.sessionDates.includes(today)) {
+    n.lastActive = new Date().toISOString();
+    return;
+  }
+
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
+  n.sessionDates.push(today);
+
   n.streak = n.sessionDates.includes(day(yesterday)) ? Math.max(n.streak, 1) + 1 : 1;
   n.bestStreak = Math.max(n.bestStreak, n.streak);
   n.lastActive = new Date().toISOString();
