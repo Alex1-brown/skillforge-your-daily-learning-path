@@ -21,8 +21,13 @@ function Learn() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0];
-  const lesson = path.lessons[index];
-  const q = lesson.questions[questionIndex];
+  if (!path) return null;
+
+  const lesson = path.lessons[index] ?? path.lessons[0];
+  if (!lesson) return null;
+
+  const q = lesson.questions[questionIndex] ?? lesson.questions[0];
+  if (!q) return null;
 
   useEffect(() => {
     setIndex(0); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
