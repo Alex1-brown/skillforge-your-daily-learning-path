@@ -17,6 +17,7 @@ function Learn() {
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [lessonCorrect, setLessonCorrect] = useState(0);
+  const [lessonStarted, setLessonStarted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0];
@@ -24,7 +25,7 @@ function Learn() {
   const q = lesson.questions[questionIndex];
 
   useEffect(() => {
-    setIndex(0); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0);
+    setIndex(0); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
   }, [skillId]);
 
   const progress = useMemo(
@@ -33,7 +34,7 @@ function Learn() {
   );
 
   const chooseLesson = (i: number) => {
-    setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0);
+    setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
   };
 
   const check = () => {
@@ -95,13 +96,27 @@ function Learn() {
         <p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} · {lesson.minutes} min · Question {questionIndex + 1}/{lesson.questions.length}</p>
         <h2 className="mt-2 text-2xl font-bold">{lesson.title}</h2>
         <p className="mt-3 leading-7 text-muted-foreground">{lesson.concept}</p>
-        <div className="mt-6 rounded-md border border-border bg-background p-5">
-          <p className="text-sm font-semibold whitespace-pre-line leading-7">{lesson.content}</p>
-          <pre className="mt-4 overflow-x-auto rounded-md bg-secondary p-4 text-sm leading-6">{lesson.example}</pre>
+        <div className="mt-6 rounded-md border border-primary/30 bg-accent/30 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase text-primary">Learn first</p>
+              <p className="mt-1 text-sm text-muted-foreground">Read the explanation and example before checking your knowledge.</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-background px-3 py-1 text-xs font-bold">{lesson.minutes} min</span>
+          </div>
+          <div className="mt-5">
+            <p className="text-sm font-bold">What you need to know</p>
+            <p className="mt-2 whitespace-pre-line text-sm leading-7 text-muted-foreground">{lesson.content}</p>
+          </div>
+          <div className="mt-5">
+            <p className="text-sm font-bold">Example</p>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-secondary p-4 text-sm leading-6">{lesson.example}</pre>
+          </div>
+          {!lessonStarted && <Button className="mt-5" variant="forge" onClick={() => setLessonStarted(true)}>I understand — start practice</Button>}
         </div>
-        <div className="mt-6 rounded-md bg-secondary/60 p-5">
-          <p className="text-sm font-bold">Practice</p>
-          <p className="mt-3 font-semibold">{q.prompt}</p>
+        {lessonStarted && <div className="mt-6 rounded-md bg-secondary/60 p-5">
+          <p className="text-xs font-bold uppercase text-primary">Check your knowledge</p>
+          <p className="mt-2 font-semibold">{q.prompt}</p>
           <div className="mt-4 grid gap-2">
             {q.options.map((o, i) => <button key={o} disabled={checked} onClick={() => setSelected(i)}
               className={`rounded-md border p-3 text-left ${selected === i ? "border-primary bg-accent" : "border-border bg-card"}`}>{o}</button>)}
@@ -113,8 +128,7 @@ function Learn() {
               ? (questionIndex < lesson.questions.length - 1 ? "Next question →" : "Finish lesson →")
               : "Try again"}
           </Button>}
-        </div>
-      </main>
+        </div>}
       <aside className="rounded-md border border-border bg-card p-5">
         <p className="text-xs font-bold uppercase text-primary">Your learning</p>
         <p className="mt-2 text-3xl font-bold">{p.xp} XP</p>
