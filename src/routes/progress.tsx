@@ -1,7 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Award, Clock3, Flame, TrendingUp } from "lucide-react";
+import { Award, CheckCircle2, Flame, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
-import { StatCard } from "@/components/stat-card";
-import { skills, week } from "@/lib/demo-data";
-export const Route=createFileRoute('/progress')({head:()=>({meta:[{title:'Progress — SkillForge'},{name:'description',content:'See your learning consistency and growth.'},{property:'og:title',content:'Progress — SkillForge'},{property:'og:description',content:'See your learning consistency and growth.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Progress});
-function Progress(){return <AppShell title="Progress that compounds" eyebrow="Your performance"><div className="grid gap-4 sm:grid-cols-3"><StatCard label="TOTAL FOCUS" value="14h 24m" detail="Across 82 sessions" Icon={Clock3}/><StatCard label="LONGEST STREAK" value="18 days" detail="Current: 12 days" Icon={Flame}/><StatCard label="SKILL LEVEL" value="Level 7" detail="340 XP to level 8" Icon={Award}/></div><div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_.6fr]"><section className="rounded-md border border-border bg-card p-5 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase text-primary">This week</p><h2 className="mt-1 text-xl font-bold">Daily focus time</h2></div><TrendingUp className="text-primary"/></div><div className="mt-8 grid h-56 grid-cols-7 items-end gap-2 sm:gap-4">{week.map((x,i)=><div key={`${x.d}${i}`} className="flex h-full flex-col justify-end text-center"><span className="mb-2 text-[10px] text-muted-foreground">{x.v||''}</span><div className={`mx-auto w-full max-w-10 rounded-t-sm ${x.v?'bg-primary':'bg-secondary'}`} style={{height:`${Math.max(x.v*8,8)}px`}}/><span className="mt-3 text-xs font-bold text-muted-foreground">{x.d}</span></div>)}</div></section><section className="rounded-md border border-border bg-card p-5 sm:p-6"><p className="text-xs font-bold uppercase text-primary">Skill balance</p><h2 className="mt-1 text-xl font-bold">Path progress</h2><div className="mt-6 space-y-5">{skills.map(s=><div key={s.id}><div className="flex justify-between text-sm"><span className="font-semibold">{s.name}</span><span className="text-muted-foreground">{s.progress}%</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{width:`${s.progress}%`}}/></div></div>)}</div></section></div></AppShell>}
+import { loadProgress, accuracy, skillPaths } from "@/lib/learning-engine";
+
+export const Route = createFileRoute("/progress")({ component: Progress });
+
+function Progress() {
+  const p = loadProgress();
+
+  return <AppShell title="Your progress" eyebrow="Learning performance">
+    <div className="grid gap-4 sm:grid-cols-3">
+      <div className="rounded-md border border-border bg-card p-5"><Target className="size-5 text-primary" /><p className="mt-3 text-xs font-bold uppercase text-primary">Accuracy</p><p className="mt-1 text-2xl font-bold">{accuracy(p)}%</p><p className="text-xs text-muted-foreground">{p.correct}/{p.answers} correct</p></div>
+      <div className="rounded-md border border-border bg-card p-5"><Flame className="size-5 text-primary" /><p className="mt-3 text-xs font-bold uppercase text-primary">Streak</p><p className="mt-1 text-2xl font-bold">{p.streak} days</p><p className="text-xs text-muted-foreground">Best: {p.bestStreak} days</p></div>
+      <div className="rounded-md border border-border bg-card p-5"><Award className="size-5 text-primary" /><p className="mt-3 text-xs font-bold uppercase text-primary">Achievements</p><p className="mt-1 text-2xl font-bold">{p.achievements.length}</p><p className="text-xs text-muted-foreground">{p.xp} XP earned</p></div>
+    </div>
+    <section className="mt-6 rounded-md border border-border bg-card p-6">
+      <p className="text-xs font-bold uppercase text-primary">Path progress</p>
+      <div className="mt-5 space-y-5">{skillPaths.map((path) => { const done = path.lessons.filter((lesson) => p.completedLessons.includes(lesson.id)).length; const pct = Math.round(done / path.lessons.length * 100); return <div key={path.id}><div className="flex justify-between text-sm"><span className="font-semibold">{path.title}</span><span className="text-muted-foreground">{done}/{path.lessons.length}</span></div><div className="mt-2 h-2 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} /></div></div>; })}</div>
+    </section>
+    <section className="mt-6 rounded-md border border-border bg-card p-6">
+      <p className="text-xs font-bold uppercase text-primary">Review queue</p>
+      {p.reviewQueue.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No lessons currently need review.</p> : <div className="mt-3 space-y-2">{p.reviewQueue.map((id) => { const lesson = skillPaths.flatMap((path) => path.lessons).find((item) => item.id === id); return <p key={id} className="flex items-center gap-2 text-sm"><CheckCircle2 className="size-4 text-primary" />{lesson?.title ?? id}</p>; })}</div>}
+    </section>
+  </AppShell>;
+}
