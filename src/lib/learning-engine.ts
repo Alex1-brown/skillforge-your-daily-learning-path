@@ -111,7 +111,7 @@ function updateStreak(n: LearningProgress) {
   yesterday.setDate(yesterday.getDate() - 1);
   n.sessionDates.push(today);
 
-  n.streak = n.sessionDates.includes(day(yesterday)) ? Math.max(n.streak, 1) + 1 : 1;
+  n.streak = n.sessionDates.includes(day(yesterday)) ? n.streak + 1 : 1;
   n.bestStreak = Math.max(n.bestStreak, n.streak);
   n.lastActive = new Date().toISOString();
 }
