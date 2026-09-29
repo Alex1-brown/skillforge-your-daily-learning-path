@@ -59,7 +59,10 @@ function Learn() {
     }
     setP((current) => completeLesson(current, lesson));
     if (index < path.lessons.length - 1) chooseLesson(index + 1);
-    else { setSelected(null); setChecked(false); }
+    else {
+      setSelected(null); setChecked(false); setLessonStarted(false);
+      setQuestionIndex(0); setLessonCorrect(0);
+    }
   };
 
   const download = () => {
@@ -93,7 +96,7 @@ function Learn() {
             </button>;
           })}
         </div>
-        <p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} · {lesson.minutes} min · Question {questionIndex + 1}/{lesson.questions.length}</p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} of {path.lessons.length} · {lesson.minutes} min</p><span className="text-xs text-muted-foreground">{progress}% path complete</span></div><div className="mb-5 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(4, ((index + (lessonStarted ? questionIndex / lesson.questions.length : 0)) / path.lessons.length) * 100)}%` }} /></div><p className="text-xs text-muted-foreground">Question {questionIndex + 1} of {lesson.questions.length}</p>
         <h2 className="mt-2 text-2xl font-bold">{lesson.title}</h2>
         <p className="mt-3 leading-7 text-muted-foreground">{lesson.concept}</p>
         <div className="mt-6 rounded-md border border-primary/30 bg-accent/30 p-5">
