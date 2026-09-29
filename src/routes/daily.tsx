@@ -2,13 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Clock3, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { loadProgress, recommendedLesson } from "@/lib/learning-engine";
+import { loadProgress, recommendedLesson, skillPaths } from "@/lib/learning-engine";
 
 export const Route = createFileRoute("/daily")({ component: Daily });
 
 function Daily() {
   const p = loadProgress();
   const lesson = recommendedLesson(p);
+  const skill = skillPaths.find((path) => path.id === lesson.skillId) ?? skillPaths[0]!;
+  const lessonIndex = Math.max(0, skill.lessons.findIndex((item) => item.id === lesson.id));
 
   return <AppShell title="Today's focus" eyebrow="Your next lesson" action={<div className="flex items-center gap-2 text-sm font-bold"><Clock3 className="size-4 text-primary" />{lesson.minutes} min</div>}>
     <div className="max-w-3xl">
@@ -21,7 +23,7 @@ function Daily() {
           <p className="text-sm font-bold">How this works</p>
           <ol className="mt-3 space-y-2 text-sm text-muted-foreground"><li>1. Read the lesson and example.</li><li>2. Start the practice questions.</li><li>3. A wrong answer stays on the same question until you solve it.</li><li>4. Finish all questions to unlock the next lesson.</li></ol>
         </div>
-        <Button asChild variant="forge" className="mt-5"><Link to="/learn">Start lesson <ArrowRight /></Link></Button>
+        <Button asChild variant="forge" className="mt-5"><Link to="/learn" search={{ skill: skill.id, lesson: lessonIndex }}>Start lesson <ArrowRight /></Link></Button>
       </section>
     </div>
   </AppShell>;
