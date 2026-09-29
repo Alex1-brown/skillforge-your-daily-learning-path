@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/learn")({
 function Learn() {
   const [p, setP] = useState<LearningProgress>(() => loadProgress());
   const search = useSearch({ from: "/learn" });
+  const navigate = useNavigate({ from: "/learn" });
   const [skillId, setSkillId] = useState(skillPaths.some((x) => x.id === search.skill) ? search.skill : "python");
   const [index, setIndex] = useState(Number.isInteger(search.lesson) && search.lesson >= 0 ? search.lesson : 0);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -32,12 +33,11 @@ function Learn() {
   const requestedLesson = path.lessons[index] ?? path.lessons[0]!;
   const lesson = isUnlocked(requestedLesson, p) ? requestedLesson : path.lessons.find((item) => isUnlocked(item, p)) ?? path.lessons[0]!;
   const safeIndex = Math.max(0, path.lessons.findIndex((item) => item.id === lesson.id));
-  const q = lesson.questions[questionIndex] ?? lesson.questions[0]!;
 
   useEffect(() => {
     setSkillId(skillPaths.some((x) => x.id === search.skill) ? search.skill : "python");
     setIndex(Number.isInteger(search.lesson) && search.lesson >= 0 ? search.lesson : 0);
-    setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
+    setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false); setLessonFinished(false);
   }, [search.skill, search.lesson]);
 
   const progress = useMemo(
@@ -45,18 +45,26 @@ function Learn() {
     [path, p],
   );
 
+  const chooseSkill = (nextSkillId: string) => {
+    if (nextSkillId === skillId) return;
+    void navigate({ search: { skill: nextSkillId, lesson: 0 } });
+  };
+
   const chooseLesson = (i: number) => {
     const candidate = path.lessons[i];
     if (!candidate || !isUnlocked(candidate, p)) return;
     setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false); setLessonFinished(false);
+    void navigate({ search: { skill: path.id, lesson: i } });
   };
+
+  const q = lesson.questions[questionIndex] ?? lesson.questions[0]!;
 
   const check = () => {
     if (selected === null || checked) return;
     const correct = selected === q.answer;
     setChecked(true);
     setLessonCorrect((v) => v + (correct ? 1 : 0));
-    setP(recordAnswer(p, lesson, correct));
+    setP((current) => recordAnswer(current, lesson, correct));
   };
 
   const nextQuestion = () => {
@@ -93,7 +101,7 @@ function Learn() {
 
   return <AppShell title="Learning Engine" eyebrow="Learn by doing">
     <div className="mb-6 grid gap-3 sm:grid-cols-4">
-      {skillPaths.map((s) => <button key={s.id} onClick={() => setSkillId(s.id)}
+      {skillPaths.map((s) => <button key={s.id} onClick={() => chooseSkill(s.id)}
         className={`rounded-md border p-4 text-left ${skillId === s.id ? "border-primary bg-accent" : "border-border bg-card"}`}>
         <b>{s.title}</b><p className="mt-1 text-xs text-muted-foreground">{s.description}</p>
         <p className="mt-2 text-xs text-muted-foreground">{s.lessons.length} lessons</p>
@@ -106,12 +114,12 @@ function Learn() {
             const ok = isUnlocked(l, p);
             const done = p.completedLessons.includes(l.id);
             return <button key={l.id} disabled={!ok} onClick={() => chooseLesson(i)}
-              className={`rounded-md border px-3 py-2 text-sm font-semibold ${i === index ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"} ${!ok ? "opacity-40" : ""}`}>
+              className={`rounded-md border px-3 py-2 text-sm font-semibold ${i === safeIndex ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"} ${!ok ? "opacity-40" : ""}`}>
               {i + 1}. {l.title}{done ? " ✓" : !ok ? " 🔒" : ""}
             </button>;
           })}
         </div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} of {path.lessons.length} · {lesson.minutes} min</p><span className="text-xs text-muted-foreground">{progress}% path complete</span></div><div className="mb-5 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(4, ((safeIndex + (lessonStarted ? questionIndex / lesson.questions.length : 0)) / path.lessons.length) * 100)}%` }} /></div><p className="text-xs text-muted-foreground">Question {questionIndex + 1} of {lesson.questions.length}</p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold uppercase text-primary">Lesson {safeIndex + 1} of {path.lessons.length} · {lesson.minutes} min</p><span className="text-xs text-muted-foreground">{progress}% path complete</span></div><div className="mb-5 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(4, ((safeIndex + (lessonStarted ? questionIndex / lesson.questions.length : 0)) / path.lessons.length) * 100)}%` }} /></div><p className="text-xs text-muted-foreground">Question {questionIndex + 1} of {lesson.questions.length}</p>
         <h2 className="mt-2 text-2xl font-bold">{lesson.title}</h2>
         <p className="mt-3 leading-7 text-muted-foreground">{lesson.concept}</p>
         <div className="mt-6 rounded-md border border-primary/30 bg-accent/30 p-5">
