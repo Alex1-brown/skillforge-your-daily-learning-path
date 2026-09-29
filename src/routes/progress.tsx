@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Award, CheckCircle2, Flame, Target } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Award, ArrowRight, Flame, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
+import { Button } from "@/components/ui/button";
 import { loadProgress, accuracy, skillPaths } from "@/lib/learning-engine";
 
 export const Route = createFileRoute("/progress")({ component: Progress });
@@ -20,7 +21,7 @@ function Progress() {
     </section>
     <section className="mt-6 rounded-md border border-border bg-card p-6">
       <p className="text-xs font-bold uppercase text-primary">Review queue</p>
-      {p.reviewQueue.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No lessons currently need review.</p> : <div className="mt-3 space-y-2">{p.reviewQueue.map((id) => { const lesson = skillPaths.flatMap((path) => path.lessons).find((item) => item.id === id); return <p key={id} className="flex items-center gap-2 text-sm"><CheckCircle2 className="size-4 text-primary" />{lesson?.title ?? id}</p>; })}</div>}
+      {p.reviewQueue.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No lessons currently need review.</p> : <div className="mt-3 space-y-2">{p.reviewQueue.map((id) => { const lesson = skillPaths.flatMap((path) => path.lessons).find((item) => item.id === id); return lesson ? <div key={id} className="flex items-center justify-between gap-3 rounded-md bg-secondary/60 p-3"><div><p className="text-sm font-semibold">{lesson.title}</p><p className="text-xs text-muted-foreground">{skillPaths.find((path) => path.id === lesson.skillId)?.title}</p></div><Button asChild variant="outline" size="sm"><Link to="/learn" search={{ skill: lesson.skillId, lesson: skillPaths.find((path) => path.id === lesson.skillId)?.lessons.findIndex((item) => item.id === lesson.id) ?? 0 }}>Review <ArrowRight /></Link></Button></div> : null; })}</div>}
     </section>
   </AppShell>;
 }
