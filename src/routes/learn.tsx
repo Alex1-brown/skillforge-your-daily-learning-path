@@ -29,7 +29,9 @@ function Learn() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0]!;
-  const lesson = path.lessons[index] ?? path.lessons[0]!;
+  const requestedLesson = path.lessons[index] ?? path.lessons[0]!;
+  const lesson = isUnlocked(requestedLesson, p) ? requestedLesson : path.lessons.find((item) => isUnlocked(item, p)) ?? path.lessons[0]!;
+  const safeIndex = Math.max(0, path.lessons.findIndex((item) => item.id === lesson.id));
   const q = lesson.questions[questionIndex] ?? lesson.questions[0]!;
 
   useEffect(() => {
@@ -44,6 +46,8 @@ function Learn() {
   );
 
   const chooseLesson = (i: number) => {
+    const candidate = path.lessons[i];
+    if (!candidate || !isUnlocked(candidate, p)) return;
     setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false); setLessonFinished(false);
   };
 
@@ -107,7 +111,7 @@ function Learn() {
             </button>;
           })}
         </div>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} of {path.lessons.length} · {lesson.minutes} min</p><span className="text-xs text-muted-foreground">{progress}% path complete</span></div><div className="mb-5 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(4, ((index + (lessonStarted ? questionIndex / lesson.questions.length : 0)) / path.lessons.length) * 100)}%` }} /></div><p className="text-xs text-muted-foreground">Question {questionIndex + 1} of {lesson.questions.length}</p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-bold uppercase text-primary">Lesson {index + 1} of {path.lessons.length} · {lesson.minutes} min</p><span className="text-xs text-muted-foreground">{progress}% path complete</span></div><div className="mb-5 h-1.5 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max(4, ((safeIndex + (lessonStarted ? questionIndex / lesson.questions.length : 0)) / path.lessons.length) * 100)}%` }} /></div><p className="text-xs text-muted-foreground">Question {questionIndex + 1} of {lesson.questions.length}</p>
         <h2 className="mt-2 text-2xl font-bold">{lesson.title}</h2>
         <p className="mt-3 leading-7 text-muted-foreground">{lesson.concept}</p>
         <div className="mt-6 rounded-md border border-primary/30 bg-accent/30 p-5">
@@ -133,7 +137,7 @@ function Learn() {
           <h3 className="mt-2 text-2xl font-bold">Good work.</h3>
           <p className="mt-2 text-sm text-muted-foreground">You completed this lesson. The next lesson is now available.</p>
           <p className="mt-4 text-sm font-semibold">{lessonCorrect} of {lesson.questions.length} questions answered correctly.</p>
-          <Button className="mt-5" variant="forge" onClick={() => index < path.lessons.length - 1 ? chooseLesson(index + 1) : chooseLesson(index)}>{index < path.lessons.length - 1 ? "Next lesson →" : "Review lesson"}</Button>
+          <Button className="mt-5" variant="forge" onClick={() => safeIndex < path.lessons.length - 1 ? chooseLesson(safeIndex + 1) : chooseLesson(safeIndex)}>{safeIndex < path.lessons.length - 1 ? "Next lesson →" : "Review lesson"}</Button>
         </div> : lessonStarted && <div className="mt-6 rounded-md bg-secondary/60 p-5">
           <p className="text-xs font-bold uppercase text-primary">Check your knowledge</p>
           <p className="mt-2 font-semibold">{q.prompt}</p>
