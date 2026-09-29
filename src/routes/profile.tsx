@@ -58,13 +58,7 @@ function Profile() {
           : <Button variant="outline" className="mt-6 w-full" onClick={() => setEditing(true)}>Edit profile</Button>}
       </aside>
       <section>
-        <div className="rounded-md border border-border bg-card">
-          <div className="border-b border-border p-5"><p className="text-xs font-bold uppercase text-primary">Learning preferences</p><h2 className="mt-1 text-xl font-bold">Make the routine yours</h2></div>
-          {prefs.map(([Icon, label, value]) => <div key={label} className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-border p-4 last:border-0">
-            <span className="grid size-9 place-items-center rounded-md bg-secondary text-primary"><Icon className="size-4" /></span>
-            <span className="min-w-0 truncate text-sm font-semibold">{label}</span><span className="text-xs text-muted-foreground">{value}</span><ChevronRight className="size-4 text-muted-foreground" />
-          </div>)}
-        </div>
+        <div className="rounded-md border border-border bg-card p-5"><p className="text-xs font-bold uppercase text-primary">Learning stats</p><h2 className="mt-1 text-xl font-bold">Your current state</h2><div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="rounded-md bg-secondary p-4"><p className="text-xs text-muted-foreground">Answers</p><p className="mt-1 text-xl font-bold">{p.answers}</p></div><div className="rounded-md bg-secondary p-4"><p className="text-xs text-muted-foreground">Accuracy</p><p className="mt-1 text-xl font-bold">{p.answers ? Math.round(p.correct / p.answers * 100) : 0}%</p></div><div className="rounded-md bg-secondary p-4"><p className="text-xs text-muted-foreground">Streak</p><p className="mt-1 text-xl font-bold">{p.streak} days</p></div></div></div>
         <div className="mt-4 flex items-start gap-3 rounded-md border border-border bg-card p-5"><ShieldCheck className="mt-0.5 size-5 text-primary" /><div><p className="text-sm font-bold">Your progress stays on this device</p><p className="mt-1 text-xs leading-5 text-muted-foreground">Learning progress is stored locally. Export it any time as a backup.</p></div></div>
       </section>
     </div>
