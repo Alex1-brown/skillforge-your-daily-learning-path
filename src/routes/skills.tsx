@@ -20,7 +20,7 @@ function Skills() {
           <div className="mt-4 h-2 rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} /></div>
           <p className="mt-2 text-xs text-muted-foreground">{done}/{path.lessons.length} lessons completed</p>
           <div className="mt-4 space-y-2">{path.lessons.map((lesson) => <div key={lesson.id} className="flex items-center gap-2 text-sm"><Check className={`size-4 ${p.completedLessons.includes(lesson.id) ? "text-primary" : "text-muted-foreground/30"}`} /><span>{lesson.title}</span></div>)}</div>
-          <Button asChild variant="forge" className="mt-5 w-full"><Link to="/learn">Open {path.title} <ArrowRight /></Link></Button>
+          <Button asChild variant="forge" className="mt-5 w-full"><Link to="/learn" search={{ skill: path.id, lesson: 0 }}>Open {path.title} <ArrowRight /></Link></Button>
         </article>;
       })}
     </div>
