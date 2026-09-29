@@ -25,6 +25,7 @@ function Learn() {
   const [checked, setChecked] = useState(false);
   const [lessonCorrect, setLessonCorrect] = useState(0);
   const [lessonStarted, setLessonStarted] = useState(false);
+  const [lessonFinished, setLessonFinished] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const path = skillPaths.find((x) => x.id === skillId) ?? skillPaths[0]!;
@@ -43,7 +44,7 @@ function Learn() {
   );
 
   const chooseLesson = (i: number) => {
-    setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
+    setIndex(i); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false); setLessonFinished(false);
   };
 
   const check = () => {
@@ -67,10 +68,11 @@ function Learn() {
       return;
     }
     setP((current) => completeLesson(current, lesson));
-    if (index < path.lessons.length - 1) chooseLesson(index + 1);
-    else {
+    if (index < path.lessons.length - 1) {
+      setLessonFinished(true);
+    } else {
       setSelected(null); setChecked(false); setLessonStarted(false);
-      setQuestionIndex(0); setLessonCorrect(0);
+      setQuestionIndex(0); setLessonCorrect(0); setLessonFinished(true);
     }
   };
 
@@ -126,7 +128,13 @@ function Learn() {
           </div>
           {!lessonStarted && <Button className="mt-5" variant="forge" onClick={() => setLessonStarted(true)}>I understand — start practice</Button>}
         </div>
-        {lessonStarted && <div className="mt-6 rounded-md bg-secondary/60 p-5">
+        {lessonFinished ? <div className="mt-6 rounded-md border border-primary/30 bg-accent/40 p-6">
+          <p className="text-xs font-bold uppercase text-primary">Lesson complete</p>
+          <h3 className="mt-2 text-2xl font-bold">Good work.</h3>
+          <p className="mt-2 text-sm text-muted-foreground">You completed this lesson. The next lesson is now available.</p>
+          <p className="mt-4 text-sm font-semibold">{lessonCorrect} of {lesson.questions.length} questions solved correctly on the first try.</p>
+          <Button className="mt-5" variant="forge" onClick={() => index < path.lessons.length - 1 ? chooseLesson(index + 1) : setLessonFinished(false)}>{index < path.lessons.length - 1 ? "Next lesson →" : "Review lesson"}</Button>
+        </div> : lessonStarted && <div className="mt-6 rounded-md bg-secondary/60 p-5">
           <p className="text-xs font-bold uppercase text-primary">Check your knowledge</p>
           <p className="mt-2 font-semibold">{q.prompt}</p>
           <div className="mt-4 grid gap-2">
