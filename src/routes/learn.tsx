@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -7,12 +7,19 @@ import {
   exportProgress, importProgress, type LearningProgress,
 } from "@/lib/learning-engine";
 
-export const Route = createFileRoute("/learn")({ component: Learn });
+export const Route = createFileRoute("/learn")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    skill: typeof search.skill === "string" ? search.skill : "python",
+    lesson: typeof search.lesson === "number" ? search.lesson : Number(search.lesson) || 0,
+  }),
+  component: Learn,
+});
 
 function Learn() {
   const [p, setP] = useState<LearningProgress>(() => loadProgress());
-  const [skillId, setSkillId] = useState("python");
-  const [index, setIndex] = useState(0);
+  const search = useSearch({ from: "/learn" });
+  const [skillId, setSkillId] = useState(skillPaths.some((x) => x.id === search.skill) ? search.skill : "python");
+  const [index, setIndex] = useState(Number.isInteger(search.lesson) && search.lesson >= 0 ? search.lesson : 0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
@@ -25,8 +32,10 @@ function Learn() {
   const q = lesson.questions[questionIndex] ?? lesson.questions[0]!;
 
   useEffect(() => {
-    setIndex(0); setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
-  }, [skillId]);
+    setSkillId(skillPaths.some((x) => x.id === search.skill) ? search.skill : "python");
+    setIndex(Number.isInteger(search.lesson) && search.lesson >= 0 ? search.lesson : 0);
+    setQuestionIndex(0); setSelected(null); setChecked(false); setLessonCorrect(0); setLessonStarted(false);
+  }, [search.skill, search.lesson]);
 
   const progress = useMemo(
     () => Math.round((path.lessons.filter((l) => p.completedLessons.includes(l.id)).length / path.lessons.length) * 100),
