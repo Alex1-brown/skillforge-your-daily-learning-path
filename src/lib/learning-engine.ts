@@ -84,7 +84,7 @@ export function importProgress(raw: string) {
     lastActive: typeof source.lastActive === "string" ? source.lastActive : "",
     streak: Math.max(0, source.streak),
     bestStreak: Math.max(0, source.bestStreak),
-    sessionDates: [...new Set(source.sessionDates.filter((date): date is string => typeof date === "string"))],
+    sessionDates: [...new Set(source.sessionDates.filter((date): date is string => typeof date === "string"))].sort(),
     achievements: [...new Set(source.achievements.filter((id): id is string => typeof id === "string"))],
     reviewQueue: [...new Set(source.reviewQueue.filter((id): id is string => typeof id === "string" && allLessons.some((l) => l.id === id)))],
   };
@@ -102,18 +102,25 @@ const day = (d = new Date()) => d.toISOString().slice(0, 10);
 
 function updateStreak(n: LearningProgress) {
   const today = day();
-  if (n.sessionDates.includes(today)) {
-    n.lastActive = new Date().toISOString();
-    return;
-  }
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  n.sessionDates.push(today);
-
-  n.streak = n.sessionDates.includes(day(yesterday)) ? n.streak + 1 : 1;
+  if (!n.sessionDates.includes(today)) n.sessionDates.push(today);
+  n.streak = calculateCurrentStreak(n.sessionDates);
   n.bestStreak = Math.max(n.bestStreak, n.streak);
   n.lastActive = new Date().toISOString();
+}
+
+function calculateCurrentStreak(sessionDates: string[]) {
+  const unique = [...new Set(sessionDates)].sort().reverse();
+  if (!unique.length || unique[0] !== day()) return 0;
+
+  let streak = 1;
+  for (let i = 1; i < unique.length; i++) {
+    const current = new Date(`${unique[i - 1]}T00:00:00`);
+    const previous = new Date(`${unique[i]}T00:00:00`);
+    const diff = Math.round((current.getTime() - previous.getTime()) / 86_400_000);
+    if (diff !== 1) break;
+    streak++;
+  }
+  return streak;
 }
 
 export function recordAnswer(p: LearningProgress, lesson: Lesson, correct: boolean) {
