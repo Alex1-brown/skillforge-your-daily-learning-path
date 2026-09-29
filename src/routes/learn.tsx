@@ -132,8 +132,8 @@ function Learn() {
           <p className="text-xs font-bold uppercase text-primary">Lesson complete</p>
           <h3 className="mt-2 text-2xl font-bold">Good work.</h3>
           <p className="mt-2 text-sm text-muted-foreground">You completed this lesson. The next lesson is now available.</p>
-          <p className="mt-4 text-sm font-semibold">{lessonCorrect} of {lesson.questions.length} questions solved correctly on the first try.</p>
-          <Button className="mt-5" variant="forge" onClick={() => index < path.lessons.length - 1 ? chooseLesson(index + 1) : setLessonFinished(false)}>{index < path.lessons.length - 1 ? "Next lesson →" : "Review lesson"}</Button>
+          <p className="mt-4 text-sm font-semibold">{lessonCorrect} of {lesson.questions.length} questions answered correctly.</p>
+          <Button className="mt-5" variant="forge" onClick={() => index < path.lessons.length - 1 ? chooseLesson(index + 1) : chooseLesson(index)}>{index < path.lessons.length - 1 ? "Next lesson →" : "Review lesson"}</Button>
         </div> : lessonStarted && <div className="mt-6 rounded-md bg-secondary/60 p-5">
           <p className="text-xs font-bold uppercase text-primary">Check your knowledge</p>
           <p className="mt-2 font-semibold">{q.prompt}</p>
