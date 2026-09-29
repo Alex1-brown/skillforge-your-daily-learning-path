@@ -26,11 +26,11 @@ function Dashboard() {
       <p className="text-xs font-bold uppercase text-primary">Continue learning</p>
       <h2 className="mt-2 text-2xl font-bold">{next.title}</h2>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{next.concept}</p>
-      <Button asChild variant="forge" className="mt-5"><Link to="/learn">Open lesson <ArrowRight /></Link></Button>
+      <Button asChild variant="forge" className="mt-5"><Link to="/learn" search={{ skill: next.skillId, lesson: Math.max(0, skillPaths.find((path) => path.id === next.skillId)?.lessons.findIndex((item) => item.id === next.id) ?? 0) }}>Open lesson <ArrowRight /></Link></Button>
     </section>
 
     <section className="mt-8">
-      <div className="flex items-end justify-between"><div><p className="text-xs font-bold uppercase text-primary">Your skill paths</p><h2 className="mt-1 text-xl font-bold">{p.completedLessons.length} / {total} lessons completed</h2></div><Button asChild variant="ghost"><Link to="/learn">Learn <ArrowRight /></Link></Button></div>
+      <div className="flex items-end justify-between"><div><p className="text-xs font-bold uppercase text-primary">Your skill paths</p><h2 className="mt-1 text-xl font-bold">{p.completedLessons.length} / {total} lessons completed</h2></div><Button asChild variant="ghost"><Link to="/skills">Skills <ArrowRight /></Link></Button></div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {completedByPath.map((path) => {
           const pct = Math.round(path.completed / path.lessons.length * 100);
