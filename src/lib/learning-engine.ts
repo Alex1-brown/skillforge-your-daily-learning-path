@@ -68,7 +68,7 @@ export function loadProgress(): LearningProgress {
       bestStreak: Number.isFinite(source.bestStreak) ? Math.max(0, Number(source.bestStreak)) : 0,
       sessionDates: Array.isArray(source.sessionDates)
         ? [...new Set(source.sessionDates.filter((date): date is string =>
-            typeof date === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(date)))].sort()
+            typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)))].sort()
         : [],
       achievements: Array.isArray(source.achievements)
         ? [...new Set(source.achievements.filter((id): id is string => typeof id === "string"))]
