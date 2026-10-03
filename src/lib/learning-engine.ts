@@ -45,8 +45,42 @@ const empty = (): LearningProgress => ({
 
 export function loadProgress(): LearningProgress {
   if (typeof window === "undefined") return empty();
-  try { return { ...empty(), ...(JSON.parse(localStorage.getItem(KEY) || "null") || {}) }; }
-  catch { return empty(); }
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (!raw || typeof raw !== "object") return empty();
+
+    const source = raw as Partial<LearningProgress>;
+    const answers = Number.isFinite(source.answers) ? Math.max(0, Number(source.answers)) : 0;
+    const correct = Number.isFinite(source.correct) ? Math.max(0, Math.min(Number(source.correct), answers)) : 0;
+    const xp = Number.isFinite(source.xp) ? Math.max(0, Number(source.xp)) : 0;
+
+    return {
+      ...empty(),
+      xp,
+      completedLessons: Array.isArray(source.completedLessons)
+        ? [...new Set(source.completedLessons.filter((id): id is string =>
+            typeof id === "string" && allLessons.some((lesson) => lesson.id === id)))]
+        : [],
+      answers,
+      correct,
+      lastActive: typeof source.lastActive === "string" ? source.lastActive : "",
+      streak: Number.isFinite(source.streak) ? Math.max(0, Number(source.streak)) : 0,
+      bestStreak: Number.isFinite(source.bestStreak) ? Math.max(0, Number(source.bestStreak)) : 0,
+      sessionDates: Array.isArray(source.sessionDates)
+        ? [...new Set(source.sessionDates.filter((date): date is string =>
+            typeof date === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(date)))].sort()
+        : [],
+      achievements: Array.isArray(source.achievements)
+        ? [...new Set(source.achievements.filter((id): id is string => typeof id === "string"))]
+        : [],
+      reviewQueue: Array.isArray(source.reviewQueue)
+        ? [...new Set(source.reviewQueue.filter((id): id is string =>
+            typeof id === "string" && allLessons.some((lesson) => lesson.id === id)))]
+        : [],
+    };
+  } catch {
+    return empty();
+  }
 }
 export function saveProgress(p: LearningProgress) {
   if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(p));
@@ -98,7 +132,12 @@ export function isUnlocked(lesson: Lesson, p: LearningProgress) {
   const i = lessons.findIndex((x) => x.id === lesson.id);
   return i <= 0 || p.completedLessons.includes(lessons[i - 1].id);
 }
-const day = (d = new Date()) => d.toISOString().slice(0, 10);
+const day = (d = new Date()) => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const date = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${date}`;
+};
 
 function updateStreak(n: LearningProgress) {
   const today = day();
